@@ -1,0 +1,40 @@
+
+<div class="container">
+
+
+{{#if products}}
+  <table class="table table-dark table-hover">
+    <thead>
+      <tr class="text-center" >
+        <th scope="col">#</th>
+        <th scope="col">Producto</th>
+        <th scope="col">Precio</th>
+        <th scope="col">Picture URL</th>
+      </tr>
+    </thead>
+    <tbody>
+
+
+      {{#each products}}
+
+      <tr class="text-center" >
+        <th  scope="row">{{this.id}}</th>
+        <td>{{this.title}}</td>
+        <td>{{this.price}}</td>
+        <td><img src={{this.pictureURL}} class="img-fluid" alt={{this.title}} width="60"></td>
+      </tr>
+      {{/each}}
+
+
+
+    </tbody>
+  </table>
+{{else}}
+<h1 class="text-center text-danger">No se encontraron productos</h1>
+{{/if}}
+
+
+
+
+
+</div>
