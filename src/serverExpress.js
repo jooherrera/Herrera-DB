@@ -1,23 +1,73 @@
-const express = require('express')
-const Contenedor = require('./Contenedor')
+/* ------------------- const express = require('express') ------------------- */
+import express from 'express'
+/* --------------- const Contenedor = require('./Contenedor') --------------- */
+import { Contenedor } from './Contenedor.js';
+
 const productos = new Contenedor("productos.txt");
-const chat = new Contenedor("chat.txt")
-const cors = require('cors')
+
+import dotenv from 'dotenv'
+dotenv.config()
 
 
-const emoji = require('node-emoji')
-const { Server: HttpServer } = require("http");
-const { Server: IOServer } = require("socket.io");
 
-const handlebars = require('express-handlebars')
+
+/* -------------------------------- __dirname ------------------------------- */
+
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+
+/* ---------------------------------- KNEX ---------------------------------- */
+
+
+
+import {config} from './config/configSQLITE.js'
+import {configMySQL} from './config/configMYSQL.js'
+
+/* ---------------------------------- chat ---------------------------------- */
+// const chat = new Contenedor("chat.txt")
+
+
+import { Contenedor2 } from './Contenedor2.js';
+
+
+const DBprod = new Contenedor2(configMySQL,'productos')
+
+
+
+/* ---------------------- const cors = require('cors') ---------------------- */
+import cors from 'cors'
+
+/* ------------------- const emoji = require('node-emoji') ------------------ */
+
+import emoji from 'node-emoji'
+
+
+// const { Server: HttpServer } = require("http");
+
+import {createServer} from 'http'
+
+
+// const { Server: IOServer } = require("socket.io");
+
+import {Server}  from 'socket.io'
+
+// const handlebars = require('express-handlebars')
+
+import handlebars from 'express-handlebars'
+
 const app = express()
 
 
 
 
 
-const httpServer = new HttpServer(app)
-const io = new IOServer(httpServer)
+const httpServer = createServer(app)
+const io = new Server(httpServer)
 
 
 
@@ -28,6 +78,7 @@ app.use(express.urlencoded({extended : true}))
 
 //! Sockect
 io.on("connection",async (socket) => {
+  const chat2 = new Contenedor2(config,'chat')
   //!Mensaje por consola- Usuario se conecta.
   console.log(emoji.get("pizza"),"Usuario Conectado")
 
@@ -35,21 +86,23 @@ io.on("connection",async (socket) => {
   socket.emit("connectionMessage","Te has conectado al socket")
   
   //!Al usuario conectado le envia todos los mensajes del chat.
-  const mensajes = await chat.getAll()
-  socket.emit("historial",mensajes)
+  // const mensajes = await chat.getAll()
+   const mensajes = await chat2.getAll()
+   socket.emit("historial",mensajes)
 
   //!Recibe el mensaje del front, le agrega la fecha-hora y lo guarda.
   //!Lo reenvia a todos los usuarios conectados.
   socket.on("chatFront",async (chatMsg) =>{
     console.log("enviaron info")
-    chatMsg.fyh = new Date().toLocaleString()
-    await chat.save(chatMsg)
+    chatMsg.hora = new Date().toLocaleString()
+    await chat2.addMsg(chatMsg)
     io.sockets.emit("chatBack",chatMsg)
   })
 
   //!Mensaje por consola- Usuario se deconecta.
   socket.on("disconnect",() => {
     console.log(emoji.get("fire"), "Usuario desconectado.")
+    chat2.desconect()
   })
 })
 
@@ -67,23 +120,14 @@ app.use(express.static('./public'))
 app.set('views','./src/views')
 app.set('view engine','hbs')
 
-const PORT = 8080
+const PORT = process.env.PORT
 
 //!HOME
 app.get('/', async (req,res,next) => {
   try {
-    const products = await productos.getAll()
-    if(products === null){
-      throw (`No existen productos en la base de datos.`)
-    }else{
-      console.log(`Información enviada`)
-      res.status(200).render('formulario')
-      // res.json(products)
-      // res.sendFile(__dirname + "/public/index.html");
-    }
+    res.status(200).render('formulario')
   } catch (error) {
-    res.status(200).render('formulario',{
-    
+    res.status(200).render('formulario',{ 
     })
   }
 
@@ -93,8 +137,25 @@ app.get('/', async (req,res,next) => {
  app.post('/', async (req,res) => {
     try {
       const data = req.body
-      await productos.save(data)
-      const products = await productos.getAll()
+
+       await DBprod.addProduct(data)
+    // await DBprod.updateProduct(2,data)
+
+      // await DBprod.deleteAll()
+
+
+
+      const products = await DBprod.getAll()
+
+
+
+
+
+
+
+
+      // await productos.save(data)
+      // const products = await productos.getAll()
       console.log("Se agrego un producto")
       //!Les envia a todos los usuarios conectados el archivo que se agregó
       io.sockets.emit("productsList", products);
@@ -110,13 +171,8 @@ app.get('/', async (req,res,next) => {
 //!
 app.get('/api/productos', async (req,res) => {
   try {
-      const products = await productos.getAll()
-      if(products === null){
-        throw (`No existen productos en la base de datos.`)
-      }else{
-        console.log(`Información enviada`)
-        res.json(products)
-      }
+      const products = await DBprod.getAll()
+      res.json(products)
   } catch (error) {
       res.status(404)
   }

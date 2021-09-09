@@ -1,4 +1,4 @@
-const socket = io() //Cuando el usuario de conecta.
+const socket = io() //Cuando el usuario se conecta.
 
 //! Historial de chats
 socket.on("historial", (data) => {
@@ -8,7 +8,7 @@ socket.on("historial", (data) => {
       inner +=`
       <div>
         <b style="color:blue">${msg.email}</b>
-        [<span style="color:brown;">${msg.fyh}</span>] : 
+        [<span style="color:brown;">${msg.hora}</span>] : 
         <i style ="color:green">${msg.msg}</i>
       </div>
       `
@@ -29,7 +29,7 @@ socket.on("chatBack", (data) => {
   let inner =`
       <div>
         <b style="color:blue">${data.email}</b>
-        [<span style="color:brown;">${data.fyh}</span>] : 
+        [<span style="color:brown;">${data.hora}</span>] : 
         <i style ="color:green">${data.msg}</i>
       </div>
       `
