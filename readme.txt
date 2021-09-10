@@ -4,4 +4,15 @@
 3° --> node ./src/script/createTable.js || Crea la tabla 'productos' 
 4° --> node ./src/script/createChat.js || Crea la DB para el chat
 
+
+.env
+
+PORT= "puerto"
+HOST= "host"
+USERDB= "user"
+PASSWORDDB= "pass"
+DATABASE= "Nombre de la DB"
+
 5° --> npm run express
+
+

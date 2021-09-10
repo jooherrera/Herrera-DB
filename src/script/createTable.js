@@ -3,7 +3,6 @@ import {configMySQL} from '../config/configMYSQL.js'
 
 const db = knex(configMySQL)
 
-
 ;(
   async function(){
     try {

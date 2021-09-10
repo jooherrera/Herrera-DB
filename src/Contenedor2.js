@@ -10,12 +10,9 @@ class Contenedor2{
 async getAll(){
   try {
     const info = await this.db.select().from(this.tabla)
-    // console.log(info)
      return info
   } catch (error) {
     console.log(error)
-  }finally{
-    // this.db.destroy()
   }
 }
 
@@ -24,11 +21,8 @@ async addMsg(msg){
     /* ------------------------------ tabla existe ------------------------------ */  
     await this.db.insert(msg).from(this.tabla)
     console.log(`Mensaje recibido y enviado a todos.`)
-    // console.log(response)
   } catch (error) {
     console.log(error)
-  }finally{
-    // this.db.destroy()
   }
 }
 
@@ -41,8 +35,6 @@ async addMsg(msg){
       console.log("Agregado")
     } catch (error) {
       console.log(error)
-    }finally{
-      // db.destroy()
     }
   }
 
@@ -85,7 +77,7 @@ async addMsg(msg){
     }
   }
 
-desconect(){
+disconnect(){
   this.db.destroy()
 }
 
